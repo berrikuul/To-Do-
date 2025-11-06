@@ -7,50 +7,37 @@
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-<header>
-<h1>Мои задачи</h1>
-</header>
+  <div class="app-container">
+    <header>Мои задачи</header>
 
+    <form id="task-form">
+      <input id="task-title" type="text" placeholder="Введите задачу..." required />
+      <select id="task-category">
+        <option value="Личное">Личное</option>
+        <option value="Работа">Работа</option>
+        <option value="Учёба">Учёба</option>
+      </select>
+      <button type="submit">Добавить</button>
+    </form>
 
-<main>
-<section class="add">
-<h2>Добавить задачу</h2>
-<form id="task-form">
-<input id="task-title" type="text" placeholder="Название задачи" required />
-<select id="task-category">
-<option value="general">Общее</option>
-<option value="work">Работа</option>
-<option value="personal">Личное</option>
-</select>
-<button type="submit">Добавить</button>
-</form>
-</section>
+    <div class="columns">
+      <section class="column">
+        <h2>Запланированные</h2>
+        <ul id="planned-list"></ul>
+      </section>
 
+      <section class="column">
+        <h2>В работе</h2>
+        <ul id="inprogress-list"></ul>
+      </section>
 
-<section class="boards">
-<article class="board" id="planned">
-<h3>Запланированное</h3>
-<ul id="planned-list"></ul>
-</article>
-
-
-<article class="board" id="inprogress">
-<h3>В работе</h3>
-<ul id="inprogress-list"></ul>
-</article>
-
-
-<article class="board" id="done">
-<h3>Сделано</h3>
-<ul id="done-list"></ul>
-</article>
-</section>
-</main>
-
-
-<footer>
-
-</footer>
-<script src="code.js"></script>
+      <section class="column">
+        <h2>Готовые</h2>
+        <ul id="done-list"></ul>
+      </section>
+    </div>
+  </div>
 </body>
+
+<script src="code.js"></script>
 </html>
