@@ -1,84 +1,102 @@
-const form = document.getElementById('task-form');
-const titleInput = document.getElementById('task-title');
-const categorySelect = document.getElementById('task-category');
+function App() {
+  const [tasks, setTasks] = React.useState(
+    JSON.parse(localStorage.getItem('tasks') || '[]')
+  );
+  const [title, setTitle] = React.useState('');
+  const [category, setCategory] = React.useState('Личное');
 
+  const save = (newTasks) => {
+    setTasks(newTasks);
+    localStorage.setItem('tasks', JSON.stringify(newTasks));
+  };
 
-const lists = {
-planned: document.getElementById('planned-list'),
-inprogress: document.getElementById('inprogress-list'),
-done: document.getElementById('done-list')
-};
+  const addTask = (e) => {
+    e.preventDefault();
+    if (!title.trim()) return;
 
-let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+    const newTask = {
+      id: Date.now().toString(),
+      title: title.trim(),
+      category,
+      status: 'planned'
+    };
 
+    const newTasks = [...tasks, newTask];
+    save(newTasks);
+    setTitle('');
+  };
 
-function save(){
-localStorage.setItem('tasks', JSON.stringify(tasks));
+  const removeTask = (id) => {
+    const newTasks = tasks.filter(t => t.id !== id);
+    save(newTasks);
+  };
+
+  const moveTask = (id, dir) => {
+    const order = ['planned', 'inprogress', 'done'];
+    const newTasks = tasks.map(t => {
+      if (t.id === id) {
+        const idx = order.indexOf(t.status);
+        return { ...t, status: order[idx + dir] };
+      }
+      return t;
+    });
+    save(newTasks);
+  };
+
+  const renderColumn = (status, titleText) => (
+    <section className="column">
+      <h2>{titleText}</h2>
+      <ul>
+        {tasks
+          .filter(t => t.status === status)
+          .map(t => (
+            <li key={t.id}>
+              <span>{t.title} ({t.category})</span>
+              <div>
+                {status !== 'planned' && (
+                  <button onClick={() => moveTask(t.id, -1)}>&lt;</button>
+                )}
+                {status !== 'done' && (
+                  <button onClick={() => moveTask(t.id, +1)}>&gt;</button>
+                )}
+                <button onClick={() => removeTask(t.id)}>✕</button>
+              </div>
+            </li>
+          ))}
+      </ul>
+    </section>
+  );
+
+  return (
+    <div className="app-container">
+      <header>Мои задачи</header>
+
+      <form onSubmit={addTask}>
+        <input
+          type="text"
+          placeholder="Введите задачу..."
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        >
+          <option value="Личное">Личное</option>
+          <option value="Работа">Работа</option>
+          <option value="Учёба">Учёба</option>
+        </select>
+        <button type="submit">Добавить</button>
+      </form>
+
+      <div className="columns">
+        {renderColumn('planned', 'Запланированные')}
+        {renderColumn('inprogress', 'В работе')}
+        {renderColumn('done', 'Готовые')}
+      </div>
+    </div>
+  );
 }
 
-
-function render(){
-Object.values(lists).forEach(ul=>ul.innerHTML='');
-tasks.forEach(task=>{
-const li = document.createElement('li');
-li.textContent = `${task.title} (${task.category})`;
-
-
-const controls = document.createElement('div');
-
-if(task.status != 'planned'){
-const prev = document.createElement('button');
-prev.textContent = '<';
-prev.onclick = ()=>{ move(task.id, -1); };
-controls.appendChild(prev);
-}
-
-if(task.status != 'done'){
-const next = document.createElement('button');
-next.textContent = '>';
-next.onclick = ()=>{ move(task.id, +1); };
-controls.appendChild(next);
-}
-
-const del = document.createElement('button');
-del.textContent = '✕';
-del.onclick = ()=>{ remove(task.id); };
-controls.appendChild(del);
-
-
-li.appendChild(controls);
-lists[task.status].appendChild(li);
-});
-}
-
-
-function addTask(title, category){
-const id = Date.now().toString();
-tasks.push({id, title, category, status: 'planned'});
-save(); render();
-}
-
-
-function remove(id){
-tasks = tasks.filter(t=>t.id != id);
-save(); render();
-}
-
-
-function move(id, dir){
-const order = ['planned','inprogress','done'];
-const t = tasks.find(x=>x.id==id);
-const idx = order.indexOf(t.status);
-t.status = order[idx + dir];
-save(); render();
-}
-
-
-form.addEventListener('submit', e=>{
-e.preventDefault();
-addTask(titleInput.value.trim(), categorySelect.value);
-titleInput.value='';
-});
-
-
-render();
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
