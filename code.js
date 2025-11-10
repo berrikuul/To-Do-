@@ -6,7 +6,7 @@ function App() {
   const [description, setDescription] = React.useState('');
   const [category, setCategory] = React.useState('Личное');
 
-  const [editingTask, setEditingTask] = React.useState(null); // <— состояние открытой задачи
+  const [editingTask, setEditingTask] = React.useState(null); 
 
   const save = (newTasks) => {
     setTasks(newTasks);
@@ -30,7 +30,19 @@ function App() {
     setDescription('');
   };
 
-  const removeTask = (id) => save(tasks.filter(t => t.id !== id));
+  const deleteTask = (id) => {
+    const newTasks = tasks.map(t =>
+      t.id === id ? { ...t, status: 'deleted' } : t
+    );
+    save(newTasks);
+  };
+
+  const restoreTask = (id) => {
+  const newTasks = tasks.map(t =>
+    t.id === id ? { ...t, status: 'planned' } : t
+  );
+  save(newTasks);
+};
 
   const moveTask = (id, dir) => {
     const order = ['planned', 'inprogress', 'done'];
@@ -49,7 +61,7 @@ function App() {
       t.id === editingTask.id ? editingTask : t
     );
     save(newTasks);
-    setEditingTask(null); // закрыть окно
+    setEditingTask(null); 
   };
 
   const renderColumn = (status, titleText) => (
@@ -70,7 +82,7 @@ function App() {
                 {status !== 'done' && (
                   <button onClick={() => moveTask(t.id, +1)}>&gt;</button>
                 )}
-                <button onClick={() => removeTask(t.id)}>✕</button>
+                <button onClick={() => deleteTask(t.id)}>✕</button>
               </div>
             </li>
           ))}
@@ -110,6 +122,24 @@ function App() {
         {renderColumn('planned', 'Запланированные')}
         {renderColumn('inprogress', 'В работе')}
         {renderColumn('done', 'Готовые')}
+      </div>
+
+      <div className="deleted-column">
+        <h2>Удалённые задачи</h2>
+        <ul>
+          {tasks
+            .filter(t => t.status === 'deleted')
+            .map(t => (
+              <li key={t.id} className="deleted">
+                <span onClick={() => setEditingTask(t)}>
+                  {t.title} ({t.category})
+                </span>
+                <div>
+                  <button onClick={() => restoreTask(t.id)}>↩</button>
+                </div>
+              </li>
+            ))}
+        </ul>
       </div>
 
       {editingTask && (
